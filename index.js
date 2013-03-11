@@ -16,7 +16,7 @@ var api = function(arities, module_id) {
                               msgpack.pack(arguments[0])]);
     } else {
           return Buffer.concat([module_id, operation_id,
-                                msgpack.pack(arguments)]);
+                                msgpack.pack(Array.prototype.slice.call(arguments))]);
     }
   };
 }
