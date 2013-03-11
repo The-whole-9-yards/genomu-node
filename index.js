@@ -95,7 +95,7 @@ var applyf = function(addr, op, cb, options) {
   this.connection.write(Buffer.concat([buf, cmd]));
 }
 
-var commitf = function() {
+var commitf = function(cb) {
   options = {}
   var cmd = Buffer.concat([msgpack.pack(this.channel), msgpack.pack(true)]);
   var buf = put().word32be(cmd.length).buffer();
