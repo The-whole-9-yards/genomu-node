@@ -3,7 +3,7 @@ var fs = require('fs');
 var net = require('net');
 var put = require('put');
 
-var modules = fs.readdirSync('../genomu/apps/genomu/priv/modules').
+var modules = fs.readdirSync((process.env['GENOMU_PATH'] || '../genomu/apps/genomu') + '/priv/modules').
               map(function(file) {
                 return JSON.parse(fs.readFileSync('../genomu/apps/genomu/priv/modules/' + file));
               });
