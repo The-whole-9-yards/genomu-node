@@ -40,14 +40,14 @@ var decode = function(data, options) {
     var vsn = msgpack.unpack(data.slice(msgpack.pack(p).length));
     var txn = msgpack.unpack(data.slice(msgpack.pack(p).length + msgpack.pack(vsn).length));
     var obj;
-    if (typeof options.vsn !== 'undefined' && typeof options.txn !== 'undefined') {
-      obj = {value: p, vsn: vsn, txn: txn}
-    }
     if (typeof options.vsn !== 'undefined') {
       obj = {value: p, vsn: vsn}
     }
     if (typeof options.txn !== 'undefined') {
       obj = {value: p, txn: txn}
+    }
+    if (typeof options.vsn !== 'undefined' && typeof options.txn !== 'undefined') {
+      obj = {value: p, vsn: vsn, txn: txn}
     }
     if (typeof options.vsn === 'undefined' && typeof options.txn === 'undefined') {
       obj = p;
