@@ -1,0 +1,19 @@
+{
+  "name": "genomu",
+  "version": "0.1.0",
+  "description": "Genomu database client",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/genomu/genomu-node"
+  },
+  "keywords": [
+    "database"
+  ],
+  "dependencies": {"msgpack-buf": ">=0.1.8", "put": ">=0.0.6"},
+  "author": "Yurii Rashkovskii <yrashk@spawngrid.com>",
+  "license": "Apache Public License"
+}
