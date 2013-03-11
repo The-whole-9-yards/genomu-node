@@ -8,27 +8,30 @@ var modules = fs.readdirSync((process.env['GENOMU_PATH'] || '../genomu/apps/geno
                 return JSON.parse(fs.readFileSync('../genomu/apps/genomu/priv/modules/' + file));
               });
 
-var api = function(args, hdr) {
-  if (args < 2) {
-      return function() {
-         return Buffer.concat([hdr,
+var api = function(arities, module_id) {
+  return function() {
+    var operation_id = arities[arguments.length];
+    if (arguments.length < 2) {
+         return Buffer.concat([module_id, operation_id,
                               msgpack.pack(arguments[0])]);
-      };
-  } else {
-      return function() {
-        return Buffer.concat([hdr,
-                              msgpack.pack(arguments)]);
-      };
-  }
+    } else {
+          return Buffer.concat([module_id, operation_id,
+                                msgpack.pack(arguments)]);
+    }
+  };
 }
 
-for (i in modules) {
+for (var i in modules) {
   exports[modules[i].name] = {};
-  for (j in modules[i].operations) {
-    var mid = modules[i].id, oid = modules[i].operations[j].id;
-    var hdr = Buffer.concat([msgpack.pack(mid),
-                             msgpack.pack(oid)]);
-    exports[modules[i].name][modules[i].operations[j].name] = api(modules[i].operations[j].args, hdr);
+  var mid = msgpack.pack(modules[i].id);
+  var operations = modules[i].operations;
+  operations = operations.reduce(function(acc, op) {
+      acc[op.name] = acc[op.name] || {arities: {}};
+      acc[op.name].arities[op.args] = msgpack.pack(op.id);
+      return acc;
+  }, {});
+  for (var j in operations) {
+    exports[modules[i].name][j] = api(operations[j].arities, mid);
   }
 }
 
