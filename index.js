@@ -35,10 +35,23 @@ for (var i in modules) {
   }
 }
 
+exports.Error = function(message) {
+  this.message = message;
+}
+exports.Error.prototype = Error.prototype;
+
 var decode = function(data, options) {
     var p = msgpack.unpack(data);
-    if (p == true || p == null) {
+    if (p == true) {
       return p;
+    }
+    if (p == null) {
+      var code = msgpack.unpack(data.slice(msgpack.pack(p).length));
+      if (code == 0) {
+        throw new exports.Error("abort");
+      } {
+        throw new exports.Error("timeout");
+      }
     }
     var vsn = msgpack.unpack(data.slice(msgpack.pack(p).length));
     var txn = msgpack.unpack(data.slice(msgpack.pack(p).length + msgpack.pack(vsn).length));
