@@ -13,7 +13,7 @@
   "keywords": [
     "database"
   ],
-  "dependencies": {"msgpack-buf": ">=0.1.8", "put": ">=0.0.6"},
+  "dependencies": {"msgpack-buf": ">=0.1.8", "put": ">=0.0.6", "underscore": ">=1.4.4"},
   "author": "Yurii Rashkovskii <yrashk@spawngrid.com>",
   "license": "Apache Public License"
 }

@@ -2,6 +2,7 @@ var msgpack = require('msgpack-buf');
 var fs = require('fs');
 var net = require('net');
 var put = require('put');
+var u = require('underscore');
 
 var modules = fs.readdirSync((process.env['GENOMU_PATH'] || '../genomu/apps/genomu') + '/priv/modules').
               map(function(file) {
@@ -74,6 +75,7 @@ var decode = function(data, options) {
 
 var setf = function(addr, op, cb, options) {
   options = options || {}
+  if (u.isString(addr)) addr = [addr];
   var cmd = Buffer.concat([msgpack.pack(this.channel), msgpack.pack(addr), msgpack.pack(1), op]);
   var buf = put().word32be(cmd.length).buffer();
 
@@ -87,6 +89,7 @@ var setf = function(addr, op, cb, options) {
 
 var getf = function(addr, op, cb, options) {
   options = options || {}
+  if (u.isString(addr)) addr = [addr];
   var cmd = Buffer.concat([msgpack.pack(this.channel), msgpack.pack(addr), msgpack.pack(0), op]);
   var buf = put().word32be(cmd.length).buffer();
 
@@ -100,6 +103,7 @@ var getf = function(addr, op, cb, options) {
 
 var applyf = function(addr, op, cb, options) {
   options = options || {}
+  if (u.isString(addr)) addr = [addr];
   var cmd = Buffer.concat([msgpack.pack(this.channel), msgpack.pack(addr), msgpack.pack(2), op]);
   var buf = put().word32be(cmd.length).buffer();
 
