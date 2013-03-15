@@ -41,6 +41,12 @@ exports.Error = function(message) {
 }
 exports.Error.prototype = Error.prototype;
 
+exports.key = function(key, version) {
+  if (u.isString(key)) key = [key];
+  if (u.isUndefined(version)) return key;
+  return {'vsn': [key, version]}
+}
+
 var decode = function(data, options) {
     var p = msgpack.unpack(data);
     if (p == true) {
