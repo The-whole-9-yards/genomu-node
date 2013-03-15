@@ -79,6 +79,13 @@ var decode = function(data, options) {
     return obj;
 }
 
+var decode_watch = function(data) {
+    var sub = msgpack.unpack(data);
+    var co = msgpack.unpack(data.slice(msgpack.pack(sub).length));
+
+    return {key: sub, commit: co};
+}
+
 var setf = function(addr, op, cb, options) {
   options = options || {}
   if (u.isString(addr)) addr = [addr];
@@ -128,10 +135,50 @@ var commitf = function(cb) {
 
   this.connection.channels[this.channel] = this.connection.channels[this.channel] || [];
   this.connection.channels[this.channel].push(function(data) {
-    cb.apply(this, [decode(data, options)]);
+    if (u.isFunction(cb)) cb.apply(this, [decode(data, options)]);
   });
 
   this.connection.write(Buffer.concat([buf, cmd]));
+}
+
+var watchf = function() {
+  var cmd = Buffer.concat([msgpack.pack(this.channel), msgpack.pack({})]);
+  var buf = put().word32be(cmd.length).buffer();
+  this.write(Buffer.concat([buf, cmd]));
+  var channel = new Channel(this, this.channel);
+  return channel;
+}
+
+var WatchChannel = function(connection, id, cb) {
+  this._callback = cb;
+  this.connection = connection;
+  this.channel = id;
+}
+
+var watchf = function(subscriptions, cb) {
+  this.channel += 1;
+
+  if (u.isString(subscriptions)) subscriptions = [[subscriptions]];
+  subscriptions = subscriptions.map(function(s) { return (u.isString(s) ? [s] : s); })
+
+  var cmd = Buffer.concat([msgpack.pack(this.channel), msgpack.pack(subscriptions)]);
+  var buf = put().word32be(cmd.length).buffer();
+
+  this.channels[this.channel] = this.channels[this.channel] || [];
+
+  var channel = new WatchChannel(this, this.channel);
+  
+  var f = function(data) {
+    channel._callback.apply(this, [decode_watch(data)]);
+  }
+  f.sticky = true;
+
+  channel._callback = cb;
+
+  this.channels[this.channel].push(f);
+  this.write(Buffer.concat([buf, cmd]));
+
+  return channel;
 }
 
 var Channel = function(connection, id) {
@@ -165,10 +212,15 @@ exports.connect = function(instance, cb) {
    var sz = data.readUInt32BE(0);
    var channel = msgpack.unpack(data.slice(4));
    var cb = conn.channels[channel].shift();
+
+   if (cb.sticky) {
+    conn.channels[channel].push(cb);
+   }
    var tail = data.slice(4 + msgpack.pack(channel).length);
    cb.call(conn, tail);
  });
  conn.channel = 0;
  conn.channels = {};
  conn.begin = startChannel;
+ conn.watch = watchf;
 };
